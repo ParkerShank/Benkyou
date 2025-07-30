@@ -169,7 +169,7 @@ class benkyou:
     def displaySet(self): # Makes a button for all the sets in the main homepage
         """Display the sets in the SetPage"""
         for setName in self.set_names:
-            if setName not in self.listOfSetsPrinted:
+            if setName not in self.listOfSetsPrinted and setName != "default":
                 tk.Button(self.setPage, text=setName, command=lambda name=setName: self.setGroup(name), bg=self.buttonColor, font=("Arial", 12)).pack(anchor="nw",side=tk.LEFT, padx=(10,0), pady=10)
                 self.listOfSetsPrinted.append(setName)
     def setGroup(self, setName): # initializes all the proper information once a corresponding set button has been pressed
@@ -186,7 +186,7 @@ class benkyou:
         self.displayFrame(setName)
 
     def makeCard(self, ques, answer, x): # Makes a new card frame using the question and answer
-        """Creates a card-like frame with a title and content"""
+        """Creates a card-like frame with a question and answer """
         card = tk.Frame(self.container, bg="#D79ECD", bd=2, relief="groove")
         card.pack(fill="x", pady=5)
         

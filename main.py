@@ -107,8 +107,9 @@ class benkyou:
         title_label.pack(anchor="w", padx=10, pady=5)
         
         content_label = tk.Label(card, text=answer, font=("American Typewriter", 12), bg="#D79ECD")
-        content_label.pack(anchor="w", padx=10, pady=5)
+        content_label.pack_forget()
         tk.Button(card, text="next", command= self.incr_lI, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
+        tk.Button(card, text = "Show answer", command=lambda:content_label.pack(anchor="w", padx=10, pady=5)).pack(anchor='s',padx=20 )
         self.frames["Question " + str(x)] = card
         print(card)
     def incr_lI(self):

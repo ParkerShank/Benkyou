@@ -10,7 +10,7 @@ class benkyou:
         self.root.title("Benkyou")
         self.root.geometry("600x400")
         self.root.configure(bg=self.bgColor)
-        
+        self.colorMode = "Dark"  
         # Container for all frames
         self.container = tk.Frame(self.root, bg=self.bgColor)
         self.container.pack(fill="both", expand=True, padx=10, pady=10)
@@ -45,8 +45,8 @@ class benkyou:
         homeButtons.pack(fill="both", pady=100)
 
         #tk.Button(homeButtons,text="Submit", command=self.submit_data, bg="#D79ECD", font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=5)
-        tk.Button(homeButtons, text="View Sets", command=lambda: self.displayFrame("SetPage"), bg=self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.BOTTOM, padx=10)
-        tk.Button(homeButtons, text="Settings", command=lambda: self.displayFrame("SettingsPage"), bg=self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.BOTTOM, padx=10)
+        tk.Button(homeButtons, text="View Sets", command=lambda: self.displayFrame("SetPage"), bg=self.buttonColor, font=("American Typewriter", 14)).pack(anchor='s',side=tk.RIGHT, padx=40)
+        tk.Button(homeButtons, text="Settings", command=lambda: self.displayFrame("SettingsPage"), bg=self.buttonColor, font=("American Typewriter", 14)).pack(anchor="s",side=tk.LEFT, padx=40)
 
         self.frames["HomePage"] = homeFrame
 
@@ -78,6 +78,19 @@ class benkyou:
 
 
         self.frames["CreateSetPage"] = createSetPage
+
+        settingsPage = tk.Frame(self.menuContainer, bg=self.bgSecondary, bd =2)
+        settingsPage.pack(fill="both", padx=10, pady=10, expand=True)
+
+        tk.Label(settingsPage, text="Settings", font=("Arial", 20), bg=self.bgSecondary, fg=self.buttonColor).pack(pady=5, anchor="center")
+
+        settingsButtons = tk.Frame(settingsPage, bg=self.bgSecondary)
+        settingsButtons.pack(pady=10)
+
+        tk.Button(settingsButtons, text="Change Cursed Mode", command=self.changeColorMode, bg=self.buttonColor, font=("Arial", 12)).pack(anchor="center", padx=10)
+        tk.Button(settingsButtons, text="Home", command=lambda: self.displayFrame("HomePage"), bg=self.buttonColor, font=("Arial", 12)).pack(anchor="center", padx=10)
+
+        self.frames["SettingsPage"] = settingsPage
 
     def makeCard(self, parent, title, content):
         """Creates a card-like frame with a title and content"""
@@ -151,7 +164,7 @@ class benkyou:
         self.container.pack_forget()
         self.menuContainer.pack_forget()
 
-        if frameName == "CreateSetPage":
+        if frameName == "CreateSetPage" or frameName == "SettingsPage":
             self.menuContainer.pack(fill="both", expand=True, padx=35, pady=35)
             frame = self.frames[frameName]
             frame.pack(fill="both", expand=True)
@@ -166,7 +179,28 @@ class benkyou:
                 set.pack(fill="both", expand=True) if set else None
         
         print(f"Frame: {frameName}")  # For debugging
+    def changeColorMode(self):
+        """Change the color mode of the application"""
+        if self.colorMode == "Dark":
+            self.bgColor = "#FFFFFF"
+            self.buttonColor = "#000000"
+            self.bgSecondary = "#F0F0F0"
+            self.colorMode = "Light"
+        else:
+            self.bgColor = "#172E4A"
+            self.buttonColor = "#E74C3C"
+            self.bgSecondary = "#27174A"
+            self.colorMode = "Dark"
 
+        # Update all frames with new colors
+        for frame in self.frames.values():
+            frame.configure(bg=self.bgColor)
+        for setFrame in self.sets.values():
+            setFrame.configure(bg=self.bgColor)
+        
+        # Repack the container to apply changes
+        self.container.pack(fill="both", expand=True, padx=10, pady=10)
+        print(f"Color mode changed to {self.colorMode}")
 dafile = "data.txt"  # Example filename
 app = benkyou(dafile)
 app.root.mainloop()

@@ -2,6 +2,7 @@ import tkinter as tk
 import json as js
 from tkinter import ttk, messagebox
 import random
+from PIL import Image, ImageTk
 class benkyou:
     def __init__(self, file):
         self.root = tk.Tk()
@@ -39,6 +40,8 @@ class benkyou:
         self.set_buttons = {}
         # Holds the current button for deleting purposes
         self.currentCard = tk.Button()
+        # Holds if image card or not
+        self.image = False
         # Create all frames
         self.makeFrames()
         
@@ -133,7 +136,7 @@ class benkyou:
                 tk.Button(makeSetButtons, text = "Study Cards", command=self.study_cards, bg = self.buttonColor,font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
                 tk.Button(makeSetButtons, text="Delete set", command= self.del_set, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
                 tk.Button(makeSetButtons, text="Delete Cards", command= self.del_cards, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
-
+                tk.Button(makeSetButtons, text="add image card", command= self.addImage, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
                 # button to go back
                 makebackButtons = tk.Frame(makeSetFrame, bg=self.bgColor)
                 makebackButtons.pack(side=tk.BOTTOM,fill="x", pady=10)
@@ -158,7 +161,7 @@ class benkyou:
         tk.Button(makeSetButtons, text = "Study Cards", command=self.study_cards, bg = self.buttonColor,font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
         tk.Button(makeSetButtons, text="Delete set", command= self.del_set, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
         tk.Button(makeSetButtons, text="Delete Cards", command= self.del_cards, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
-
+        tk.Button(makeSetButtons, text="add image card", command= self.addImage, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
         # button to go back
         makebackButtons = tk.Frame(makeSetFrame, bg=self.bgColor)
         makebackButtons.pack(side=tk.BOTTOM,fill="x", pady=10)
@@ -247,30 +250,50 @@ class benkyou:
             self.cards = self.set_names[setName]
             self.count = self.cards["count"]
             for x in range(1, self.count):
-                self.makeCard(self.cards["Question " + str(x)][0], self.cards["Question " + str(x)][1],x)
+                if not self.cards["Question " + str(x)][0].endswith("jpeg"):
+                    self.makeCard(self.cards["Question " + str(x)][0], self.cards["Question " + str(x)][1],x)
+                else:
+                    self.makeCard(self.cards["Question " + str(x)][0], self.cards["Question " + str(x)][1],x,True)
         else:
             self.count = 1
             self.cards = {}
         self.displayFrame(setName)
 
-    def makeCard(self, ques, answer, x): # Makes a new card frame using the question and answer
+    def makeCard(self, ques, answer, x, image = False): # Makes a new card frame using the question and answer
         """Creates a card-like frame with a question and answer """
         card = tk.Frame(self.container, bg="#D79ECD", bd=2, relief="groove")
 
-        
-        title_label = tk.Label(card, text=ques, font=("American Typewriter", 16), bg="#D79ECD")
-        title_label.pack(anchor="w", padx=10, pady=5)
-        
-        content_label = tk.Label(card, text=answer, font=("American Typewriter", 12), bg="#D79ECD")
-        content_label.pack_forget()
-        tk.Button(card, text="back", command= self.de_incr_lI, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
-        tk.Button(card, text="next", command= self.incr_lI, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
-        #tk.Button(card, text="Delete", command= self.deleteCard, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
-        tk.Button(card, text = "Show answer", command=lambda:content_label.pack(anchor="w", padx=10, pady=5)).pack(anchor='s',padx=20 )
-        tk.Button(card, text = "exit", command=lambda: self.displayFrame(self.currentSet), bg = self.bgColor, font=("American Typewriter", 14)).pack(anchor='s',padx=20 )
-        
+        if not image:
+            title_label = tk.Label(card, text=ques, font=("American Typewriter", 16), bg="#D79ECD")
+            title_label.pack(anchor="w", padx=10, pady=5)
+            
+            content_label = tk.Label(card, text=answer, font=("American Typewriter", 12), bg="#D79ECD")
+            content_label.pack_forget()
+            tk.Button(card, text="back", command= self.de_incr_lI, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
+            tk.Button(card, text="next", command= self.incr_lI, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
+            #tk.Button(card, text="Delete", command= self.deleteCard, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
+            tk.Button(card, text = "Show answer", command=lambda:content_label.pack(anchor="w", padx=10, pady=5)).pack(anchor='s',padx=20 )
+            tk.Button(card, text = "exit", command=lambda: self.displayFrame(self.currentSet), bg = self.bgColor, font=("American Typewriter", 14)).pack(anchor='s',padx=20)
+        else:
+            actualImage = Image.open("images/" +ques)
+            resized_image = actualImage.resize((250, 200))
+            actualImage = ImageTk.PhotoImage(resized_image)
+            title_label = tk.Label(card, image=actualImage)
+            title_label.image = actualImage
+            title_label.pack()
+            content_label = tk.Label(card, text=answer, font=("American Typewriter", 12), bg="#D79ECD")
+            content_label.pack_forget()
+            tk.Button(card, text="back", command= self.de_incr_lI, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
+            tk.Button(card, text="next", command= self.incr_lI, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
+            tk.Button(card, text = "Show answer", command=lambda:content_label.pack(anchor="w", padx=10, pady=5)).pack(anchor='s',padx=20 )
+            tk.Button(card, text = "exit", command=lambda: self.displayFrame(self.currentSet), bg = self.bgColor, font=("American Typewriter", 14)).pack(anchor='s',padx=20)
+
         self.frames["Question " + str(x)] = card
         print(card)
+    
+    def addImage(self):
+        self.image = True
+        self.displayFrame("MakeCardFrame")
     #def deleteCard(self):
     #    questionNum = self.randomCard[self.lI]
     #    self.frames[questionNum].destroy()
@@ -297,6 +320,18 @@ class benkyou:
         if not answer or not question:
             messagebox.showerror("Error", "Please enter a name!")
             return
+        if self.image:
+            try:
+                open("images/"+question)
+                self.cards["Question " + str(self.count)] = (question, answer)
+                self.makeCard(question, answer, self.count, self.image)
+                self.count += 1
+                self.clear_form()
+                return answer, question
+            except FileNotFoundError:
+                messagebox.showerror("Error", "Please enter a valid jpeg in images folder")
+                return
+
         self.cards["Question " + str(self.count)] = (question, answer)
         self.makeCard(question, answer, self.count)
         self.count += 1
@@ -308,6 +343,7 @@ class benkyou:
         self.entryquestion.delete(0, tk.END)
 
     def updateCards(self): # Updates the set and the file once all cards have been inputted
+        self.image = False
         self.cards["count"] = self.count
         self.set_names[self.currentSet] = self.cards
         file.truncate(0)

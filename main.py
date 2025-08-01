@@ -21,7 +21,8 @@ class benkyou:
         self.buttonColor = "#C9EAF8"
         self.file = file # The file we read and write to
         # holds dictionary representation of all the flash card information
-        self.set_names = js.load(file)
+        self.set_names = js.load(self.file)
+        self.file.seek(0)
         # used when making buttons for the set page
         self.listOfSetsPrinted = []
         # holds text information for cards in a single set
@@ -34,6 +35,10 @@ class benkyou:
         self.lI = 0
         # Helps increment through the flash cards in a random order
         self.randomCard = []
+        # Holds all the set buttons
+        self.set_buttons = {}
+        # Holds the current button for deleting purposes
+        self.currentCard = tk.Button()
         # Create all frames
         self.makeFrames()
         
@@ -65,7 +70,7 @@ class benkyou:
         tk.Button(setButtons, text="Create Set", command=lambda: self.displayFrame("CreateSetPage"), bg=self.buttonColor, font=("Arial", 12)).pack(side=tk.RIGHT, padx=10)
         tk.Button(setButtons, text="Back to Home", command=lambda: self.displayFrame("HomePage"), bg=self.buttonColor, font=("Arial", 12)).pack(side=tk.LEFT, pady=10)
         self.init_sets() # initializes the frames for cards that already exist
-
+ 
 
         self.frames["SetPage"] = self.setPage
 
@@ -126,6 +131,8 @@ class benkyou:
                 makeSetButtons.pack(anchor="nw", pady=(10,0))
                 tk.Button(makeSetButtons, text="add Card", command=lambda: self.displayFrame("MakeCardFrame"), bg="#D79ECD", font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
                 tk.Button(makeSetButtons, text = "Study Cards", command=self.study_cards, bg = self.buttonColor,font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
+                tk.Button(makeSetButtons, text="Delete set", command= self.del_set, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
+                tk.Button(makeSetButtons, text="Delete Cards", command= self.del_cards, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
 
                 # button to go back
                 makebackButtons = tk.Frame(makeSetFrame, bg=self.bgColor)
@@ -149,6 +156,8 @@ class benkyou:
         makeSetButtons.pack(anchor="nw", pady=(10,0))
         tk.Button(makeSetButtons, text="add Card", command=lambda: self.displayFrame("MakeCardFrame"), bg="#D79ECD", font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
         tk.Button(makeSetButtons, text = "Study Cards", command=self.study_cards, bg = self.buttonColor,font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
+        tk.Button(makeSetButtons, text="Delete set", command= self.del_set, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
+        tk.Button(makeSetButtons, text="Delete Cards", command= self.del_cards, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
 
         # button to go back
         makebackButtons = tk.Frame(makeSetFrame, bg=self.bgColor)
@@ -165,13 +174,72 @@ class benkyou:
         self.displaySet()
         self.displayFrame("SetPage")
         self.entrySetName.delete(0, tk.END)
-
+    def del_set(self):
+        
+        self.displayFrame("SetPage")
+        self.set_names.pop(self.currentSet)
+        self.file.truncate(0)
+        js.dump(self.set_names, self.file, indent= 4) # writes it to the file 
+        
+        self.file.seek(0)
+        del self.frames[self.currentSet]
+        print(self.set_names.keys())
+        button = self.set_buttons[self.currentSet]
+        button.pack_forget()
+        self.set_buttons.pop(self.currentSet)
+        
     def displaySet(self): # Makes a button for all the sets in the main homepage
         """Display the sets in the SetPage"""
         for setName in self.set_names:
             if setName not in self.listOfSetsPrinted and setName != "default":
-                tk.Button(self.setPage, text=setName, command=lambda name=setName: self.setGroup(name), bg=self.buttonColor, font=("Arial", 12)).pack(anchor="nw",side=tk.LEFT, padx=(10,0), pady=10)
+                button = tk.Button(self.setPage, text=setName, command=lambda name=setName: self.setGroup(name), bg=self.buttonColor, font=("Arial", 12))
+                button.pack(anchor="nw",side=tk.LEFT, padx=(10,0), pady=10)
+                self.set_buttons[setName] = button
+                print(button)
                 self.listOfSetsPrinted.append(setName)
+    # deletes all the cards
+    def del_cards(self):
+        if len(self.set_names[self.currentSet]) <= 1:
+            messagebox.showerror("Error", "Set already Empty")
+            return
+        self.frames[self.currentSet].pack_forget()
+        self.count = self.cards["count"]
+        deleteCards = tk.Frame(self.container, bg=self.bgColor, bd=2)
+        deleteCards.pack(fill="both", expand=True, padx=40, pady=40)
+        tk.Label(deleteCards, text=f"Click to Delete", font=("Arial", 20), bg=self.bgColor, fg=self.buttonColor).pack(pady=5, anchor="center")
+        makeDeleteButtons = tk.Frame(deleteCards, bg=self.bgColor)
+        makeDeleteButtons.pack(anchor="nw", pady=(10,0))
+        for card in self.cards:
+            if card != "count":
+                button = tk.Button(deleteCards, text= self.cards[card][0], bg = self.buttonColor, font= ("Arial", 12))
+                button.configure(command=lambda btn = button, name = card: self.del_card(btn, name, deleteCards))
+                button.pack(side=tk.TOP, padx=10)
+        
+
+        makeBackButtons = tk.Frame(deleteCards, bg=self.bgColor)
+        makeBackButtons.pack(side=tk.BOTTOM,fill="x", pady=10)
+        tk.Button(makeBackButtons, text="Back", command=lambda: self.del_card_page(deleteCards), bg=self.buttonColor, font=("Arial", 12)).pack(side=tk.BOTTOM, padx=10)
+        
+    def del_card(self, button, card, frame):
+        button.destroy()
+        cardNum = card.split()
+        num = cardNum[1]
+        print(num)
+        del self.cards[card]
+        for x in range(int(num), len(self.cards)): # Fixes all the card numbers
+            self.cards["Question " + str(x)] = self.cards["Question " + str(x + 1)]
+            del self.cards["Question " + str(x + 1)]
+            print("Question " + str(x))
+        self.count -= 1
+        self.cards["count"] = self.count
+        frame.destroy()
+        self.del_cards()
+
+    def del_card_page(self, frame):
+        frame.destroy()
+        self.updateCards()
+        self.setGroup(self.currentSet)
+
     def setGroup(self, setName): # initializes all the proper information once a corresponding set button has been pressed
         self.currentSet = setName
         print(setName)
@@ -188,7 +256,7 @@ class benkyou:
     def makeCard(self, ques, answer, x): # Makes a new card frame using the question and answer
         """Creates a card-like frame with a question and answer """
         card = tk.Frame(self.container, bg="#D79ECD", bd=2, relief="groove")
-        card.pack(fill="x", pady=5)
+
         
         title_label = tk.Label(card, text=ques, font=("American Typewriter", 16), bg="#D79ECD")
         title_label.pack(anchor="w", padx=10, pady=5)
@@ -197,11 +265,31 @@ class benkyou:
         content_label.pack_forget()
         tk.Button(card, text="back", command= self.de_incr_lI, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
         tk.Button(card, text="next", command= self.incr_lI, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
+        #tk.Button(card, text="Delete", command= self.deleteCard, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
         tk.Button(card, text = "Show answer", command=lambda:content_label.pack(anchor="w", padx=10, pady=5)).pack(anchor='s',padx=20 )
         tk.Button(card, text = "exit", command=lambda: self.displayFrame(self.currentSet), bg = self.bgColor, font=("American Typewriter", 14)).pack(anchor='s',padx=20 )
         
         self.frames["Question " + str(x)] = card
         print(card)
+    #def deleteCard(self):
+    #    questionNum = self.randomCard[self.lI]
+    #    self.frames[questionNum].destroy()
+    #    del self.frames[questionNum]
+    #    self.cards.pop(questionNum)
+        
+    #    for x in range(self.lI, len(self.randomCard)):
+    #        self.cards[self.randomCard[x]] = self.cards[self.randomCard[x+ 1]]
+    #        del self.cards[self.randomCard[x + 1]]
+    #    self.randomCard.pop(self.lI)
+    #    self.cards["count"] = len(self.cards) # changes count to proper length of set
+    #    self.set_names[self.currentSet] = self.cards # updates sets
+    #    file.truncate(0)
+    #    js.dump(self.set_names, self.file, indent= 4) # writes it to the file
+    #    self.file.seek(0)
+    #    self.setGroup(self.currentSet)
+    #    self.lI -= 1
+    #    self.incr_lI()
+
     def submit_data(self): # Gets the information to make the card
         answer = self.entryanwser.get().strip()
         question = self.entryquestion.get().strip()
@@ -222,14 +310,14 @@ class benkyou:
     def updateCards(self): # Updates the set and the file once all cards have been inputted
         self.cards["count"] = self.count
         self.set_names[self.currentSet] = self.cards
-        
-        self.file.seek(0)
+        file.truncate(0)
         js.dump(self.set_names, self.file, indent=4)
+        self.file.seek(0)
         self.displayFrame(self.currentSet)
         return
     
     def study_cards(self): # Goes through all the cards in a set
-        if len(self.cards) == 0: # exits if no cards in set
+        if len(self.cards) == 0 or len(self.cards) == 1: # exits if no cards in set
             messagebox.showerror("Error", "Set Empty")
             return
         self.lI = 1

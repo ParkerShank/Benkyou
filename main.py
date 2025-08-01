@@ -120,7 +120,7 @@ class benkyou:
 
 
     #def make_new_set(self):
-    #   self.count = 1
+    # self.count = 1
     # initializes all the set frames that already exist
     def init_sets(self): # initializes all the set pages for already existing sets
         for setName in self.set_names:
@@ -144,6 +144,7 @@ class benkyou:
                 self.frames[setName] = makeSetFrame
                 print(f"Set '{setName}' created successfully.")
         self.displaySet() # displays the set buttons on the main set page
+
     def createSet(self, name): # Creates new set pages and buttons
         # gets name
         setName = name.strip()
@@ -177,7 +178,7 @@ class benkyou:
         self.displaySet()
         self.displayFrame("SetPage")
         self.entrySetName.delete(0, tk.END)
-    def del_set(self):
+    def del_set(self): # Deletes a set
         
         self.displayFrame("SetPage")
         self.set_names.pop(self.currentSet)
@@ -201,7 +202,7 @@ class benkyou:
                 print(button)
                 self.listOfSetsPrinted.append(setName)
     # deletes all the cards
-    def del_cards(self):
+    def del_cards(self): # Makes a page and buttons to delete a card in a set
         if len(self.set_names[self.currentSet]) <= 1:
             messagebox.showerror("Error", "Set already Empty")
             return
@@ -223,7 +224,7 @@ class benkyou:
         makeBackButtons.pack(side=tk.BOTTOM,fill="x", pady=10)
         tk.Button(makeBackButtons, text="Back", command=lambda: self.del_card_page(deleteCards), bg=self.buttonColor, font=("Arial", 12)).pack(side=tk.BOTTOM, padx=10)
         
-    def del_card(self, button, card, frame):
+    def del_card(self, button, card, frame): # Deletes the actual card from a set and updates all the cards in the current set with proper buttons
         button.destroy()
         cardNum = card.split()
         num = cardNum[1]
@@ -238,7 +239,7 @@ class benkyou:
         frame.destroy()
         self.del_cards()
 
-    def del_card_page(self, frame):
+    def del_card_page(self, frame): # Deletes the delete card page once user goes back to the set page
         frame.destroy()
         self.updateCards()
         self.setGroup(self.currentSet)
@@ -250,10 +251,14 @@ class benkyou:
             self.cards = self.set_names[setName]
             self.count = self.cards["count"]
             for x in range(1, self.count):
-                if not self.cards["Question " + str(x)][0].endswith("jpeg"):
+                if not self.cards["Question " + str(x)][0].endswith(".jpeg"):
                     self.makeCard(self.cards["Question " + str(x)][0], self.cards["Question " + str(x)][1],x)
-                else:
-                    self.makeCard(self.cards["Question " + str(x)][0], self.cards["Question " + str(x)][1],x,True)
+                else: # Makes sure image can actually be opened before making the card
+                    try:
+                        open("images/" + self.cards["Question " + str(x)][0])
+                        self.makeCard(self.cards["Question " + str(x)][0], self.cards["Question " + str(x)][1],x,True)
+                    except FileNotFoundError:
+                        messagebox.showerror("Error", "Couldn't find jpeg")
         else:
             self.count = 1
             self.cards = {}
@@ -274,7 +279,7 @@ class benkyou:
             #tk.Button(card, text="Delete", command= self.deleteCard, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
             tk.Button(card, text = "Show answer", command=lambda:content_label.pack(anchor="w", padx=10, pady=5)).pack(anchor='s',padx=20 )
             tk.Button(card, text = "exit", command=lambda: self.displayFrame(self.currentSet), bg = self.bgColor, font=("American Typewriter", 14)).pack(anchor='s',padx=20)
-        else:
+        else: # Makes an image if user clicked add an image card
             actualImage = Image.open("images/" +ques)
             resized_image = actualImage.resize((250, 200))
             actualImage = ImageTk.PhotoImage(resized_image)
@@ -291,7 +296,7 @@ class benkyou:
         self.frames["Question " + str(x)] = card
         print(card)
     
-    def addImage(self):
+    def addImage(self): # Makes self.image true if clicked add image card
         self.image = True
         self.displayFrame("MakeCardFrame")
     #def deleteCard(self):
@@ -320,7 +325,7 @@ class benkyou:
         if not answer or not question:
             messagebox.showerror("Error", "Please enter a name!")
             return
-        if self.image:
+        if self.image: # Makes sure image can actually be opened before actually making the card
             try:
                 open("images/"+question)
                 self.cards["Question " + str(self.count)] = (question, answer)

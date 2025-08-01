@@ -4,24 +4,25 @@ from tkinter import ttk, messagebox
 import random
 class benkyou:
     def __init__(self, file):
+        self.bgColor= "#011627"
+        self.bgSecondary ="#FF3366"
         self.root = tk.Tk()
         self.root.title("Benkyou")
         self.root.geometry("600x400")
-        self.root.configure(bg="#3d374a")
-        self.bgColor= "#172E4A"
-        self.bgSecondary ="#27174A"
+        self.root.configure(bg=self.bgColor)
+        
         # Container for all frames
-        self.container = tk.Frame(self.root, bg="#3d374a")
+        self.container = tk.Frame(self.root, bg=self.bgColor)
         self.container.pack(fill="both", expand=True, padx=10, pady=10)
         self.menuContainer = tk.Frame(self.root, bg=self.bgColor)
         # Dictionary to store all frames
         self.frames = {}
         # colors
         self.mainColor = "#082E3F"
-        self.buttonColor = "#C9EAF8"
+        self.buttonColor = self.bgSecondary
         self.file = file # The file we read and write to
         # holds dictionary representation of all the flash card information
-        self.set_names = js.load(file)
+        self.set_names = self.safe_load_json()
         # used when making buttons for the set page
         self.listOfSetsPrinted = []
         # holds text information for cards in a single set
@@ -39,18 +40,33 @@ class benkyou:
         
         # Show the first frame
         self.displayFrame("HomePage")
+
+    def safe_load_json(self):
+        self.file.seek(0)
+        content = self.file.read().strip()
+        if not content:
+            self.file.seek(0)
+            self.file.write("{}")  # write empty dict if file is empty
+            self.file.flush()
+            self.file.seek(0)
+            return {}
+        self.file.seek(0)
+        return js.load(self.file)
+
     def makeFrames(self):
         """This function creates different frames so they can be showed later"""
         # We will start with making the Home Page Frame
-        homeFrame = tk.Frame(self.container, bg="#3d374a", bd =2)
+        homeFrame = tk.Frame(self.container, bg=self.bgColor, bd =2)
         homeFrame.pack(fill="both", expand=True)
         # Now we will add the content to this page
-        tk.Label(homeFrame, text="Welcome to Benkyou", font=("American Typewriter", 20), bg="#D79ECD").pack(pady=5, anchor="w")
+        tk.Label(homeFrame, text="Welcome to Benkyou", font=("American Typewriter", 35), bg=self.bgColor, fg=self.bgSecondary).pack(pady=5, anchor="n")
+        tk.Label(homeFrame, text="Flashcard and set maker", font=("American Typewriter", 14), bg=self.bgColor, fg=self.bgSecondary).pack(pady=5, anchor="n")
+
         # Buttons for the home page
-        homeButtons = tk.Frame(homeFrame, bg="#3d374a")
-        homeButtons.pack(pady=10)
-        tk.Button(homeButtons, text="View Sets", command=lambda: self.displayFrame("SetPage"), bg=self.buttonColor, font=("American Typewriter", 14)).pack(anchor='s',side=tk.RIGHT, padx=40)
-        tk.Button(homeButtons, text="Exit", command=self.root.destroy).pack(anchor='s',side=tk.RIGHT, padx= 40)
+        homeButtons = tk.Frame(homeFrame, bg=self.bgColor)
+        homeButtons.pack(pady=40)
+        tk.Button(homeButtons, text="View Sets", command=lambda: self.displayFrame("SetPage"), bg=self.buttonColor, font=("American Typewriter", 14)).pack(anchor='s',side=tk.RIGHT, padx=20)
+        tk.Button(homeButtons, text="Exit", command=self.root.destroy, bg=self.buttonColor, font=("American Typewriter", 14)).pack(anchor='s',side=tk.RIGHT, padx= 20)
         #tk.Button(homeButtons, text="Settings", command=lambda: self.displayFrame("SettingsPage"), bg=self.buttonColor, font=("American Typewriter", 14)).pack(anchor="s",side=tk.LEFT, padx=40)
         #tk.Button(homeButtons, text="add Card", command=lambda: self.displayFrame("MakeCardFrame"), bg="#D79ECD", font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
         #tk.Button(homeButtons, text="Make new set", command=self.make_new_set,bg = self.buttonColor,font= ("American Typewriter", 14)).pack(side=tk.LEFT,padx=10)
@@ -72,27 +88,27 @@ class benkyou:
         # This is the make card frame
         makeCardFrame = tk.Frame(self.container, bg = self.mainColor, bd = 2)
         makeCardFrame.pack(fill = "both", expand=True)
-        tk.Label(makeCardFrame, text="Please make a card", font=("American Typewriter", 20), bg = self.buttonColor).pack(pady=5, anchor="w")
+        tk.Label(makeCardFrame, text="Please make a card", font=("American Typewriter", 20), bg = self.mainColor, fg = self.bgSecondary).pack(pady=5, anchor="w")
         self.frames["MakeCardFrame"] = makeCardFrame
-        self.entryquestion = tk.Entry(makeCardFrame, font=("American Typewriter", 14), bg="#D79ECD")
+        self.entryquestion = tk.Entry(makeCardFrame, font=("American Typewriter", 14), bg=self.bgSecondary)
         self.entryquestion.pack(fill="x", padx=10, pady=5)
-        self.entryanwser = tk.Entry(makeCardFrame, font=("American Typewriter", 14), bg="#D79ECD")
+        self.entryanwser = tk.Entry(makeCardFrame, font=("American Typewriter", 14), bg=self.bgSecondary)
         self.entryanwser.pack(fill="x", padx=10, pady=5)
         # Buttons for the make card page
         cardMaker = tk.Entry(makeCardFrame, bg=self.buttonColor)
         cardMaker.pack(pady=10)
         
 
-        tk.Button(cardMaker, text="Submit", command=self.submit_data, bg="#D79ECD", font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=5)
+        tk.Button(cardMaker, text="Submit", command=self.submit_data, bg=self.bgSecondary, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=5)
         tk.Button(cardMaker, text="Back Home", command=self.updateCards,bg= self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
         self.frames["MakeCardFrame"] = makeCardFrame
 
         # makes a new set page for each set
-        createSetPage = tk.Frame(self.container, bg=self.bgSecondary, bd =2)
+        createSetPage = tk.Frame(self.container, bg="#BFB1C1", bd =2)
         createSetPage.pack(fill="both",padx=10,pady=10, expand=True)
 
-        tk.Label(createSetPage, text="Create a Set", font=("Arial", 20), bg=self.bgSecondary, fg=self.buttonColor).pack(pady=5, anchor="center")
-        tk.Label(createSetPage, text="Enter the name of the set", font=("Arial", 14), bg=self.bgSecondary, fg=self.buttonColor).pack(pady=5, anchor="center")
+        tk.Label(createSetPage, text="Create a Set", font=("Arial", 20), bg="#BFB1C1", fg=self.bgColor).pack(pady=5, anchor="center")
+        tk.Label(createSetPage, text="Enter the name of the set", font=("Arial", 14), bg="#BFB1C1", fg=self.bgColor).pack(pady=5, anchor="center")
 
         self.entrySetName = tk.Entry(createSetPage, font=("American Typewriter", 14), bg=self.buttonColor)
         self.entrySetName.pack(fill="x", padx=10, pady=5)
@@ -124,8 +140,8 @@ class benkyou:
                 tk.Label(makeSetFrame, text=f"Set: {setName}", font=("Arial", 20), bg=self.bgColor, fg=self.buttonColor).pack(pady=5, anchor="center")
                 makeSetButtons = tk.Frame(makeSetFrame, bg=self.bgColor)
                 makeSetButtons.pack(anchor="nw", pady=(10,0))
-                tk.Button(makeSetButtons, text="add Card", command=lambda: self.displayFrame("MakeCardFrame"), bg="#D79ECD", font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
-                tk.Button(makeSetButtons, text = "Study Cards", command=self.study_cards, bg = self.buttonColor,font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
+                tk.Button(makeSetButtons, text="add Card", command=lambda: self.displayFrame("MakeCardFrame"), bg=self.bgSecondary, font=("American Typewriter", 14)).pack(anchor='n', side=tk.LEFT, padx=10)
+                tk.Button(makeSetButtons, text = "Study Cards", command=self.study_cards, bg = self.buttonColor,font=("American Typewriter", 14)).pack(anchor='n', side=tk.LEFT, padx=10)
 
                 # button to go back
                 makebackButtons = tk.Frame(makeSetFrame, bg=self.bgColor)
@@ -147,8 +163,8 @@ class benkyou:
         tk.Label(makeSetFrame, text=f"Set: {setName}", font=("Arial", 20), bg=self.bgColor, fg=self.buttonColor).pack(pady=5, anchor="center")
         makeSetButtons = tk.Frame(makeSetFrame, bg=self.bgColor)
         makeSetButtons.pack(anchor="nw", pady=(10,0))
-        tk.Button(makeSetButtons, text="add Card", command=lambda: self.displayFrame("MakeCardFrame"), bg="#D79ECD", font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
-        tk.Button(makeSetButtons, text = "Study Cards", command=self.study_cards, bg = self.buttonColor,font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
+        tk.Button(makeSetButtons, text="add Card", command=lambda: self.displayFrame("MakeCardFrame"), bg=self.bgSecondary, font=("American Typewriter", 14)).pack(anchor='n', side=tk.LEFT, padx=10)
+        tk.Button(makeSetButtons, text = "Study Cards", command=self.study_cards, bg = self.buttonColor,font=("American Typewriter", 14)).pack(anchor='n', side=tk.LEFT, padx=10)
 
         # button to go back
         makebackButtons = tk.Frame(makeSetFrame, bg=self.bgColor)
@@ -187,21 +203,23 @@ class benkyou:
 
     def makeCard(self, ques, answer, x): # Makes a new card frame using the question and answer
         """Creates a card-like frame with a question and answer """
-        card = tk.Frame(self.container, bg="#D79ECD", bd=2, relief="groove")
+        card = tk.Frame(self.container, bg=self.mainColor, bd=2, relief="groove")
         card.pack(fill="x", pady=5)
         
-        title_label = tk.Label(card, text=ques, font=("American Typewriter", 16), bg="#D79ECD")
+        title_label = tk.Label(card, text=ques, font=("American Typewriter", 16), fg=self.bgSecondary, bg= self.mainColor)
         title_label.pack(anchor="w", padx=10, pady=5)
-        
-        content_label = tk.Label(card, text=answer, font=("American Typewriter", 12), bg="#D79ECD")
-        content_label.pack_forget()
-        tk.Button(card, text="back", command= self.de_incr_lI, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
-        tk.Button(card, text="next", command= self.incr_lI, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
-        tk.Button(card, text = "Show answer", command=lambda:content_label.pack(anchor="w", padx=10, pady=5)).pack(anchor='s',padx=20 )
-        tk.Button(card, text = "exit", command=lambda: self.displayFrame(self.currentSet), bg = self.bgColor, font=("American Typewriter", 14)).pack(anchor='s',padx=20 )
-        
+
+        content_label = tk.Label(card, text=answer, font=("American Typewriter", 12), fg=self.mainColor, bg= self.mainColor)
+        content_label.pack(anchor="w", padx=10, pady=5)
+        tk.Button(card, text="back", command= lambda: (self.hideCard(content_label),self.de_incr_lI()), bg= self.bgSecondary, font=("American Typewriter", 14)).pack(anchor='s', side=tk.LEFT, padx= 20, pady=20)
+        tk.Button(card, text="next", command= lambda: (self.hideCard(content_label),self.incr_lI()), bg= self.bgSecondary, font=("American Typewriter", 14)).pack(anchor='s', side=tk.RIGHT, padx= 20, pady=20)
+        tk.Button(card, text = "Show answer", command=lambda:content_label.config(fg=self.bgSecondary),font=("American Typewriter", 14),bg = self.mainColor, fg= self.bgSecondary).pack(anchor='center', side=tk.BOTTOM,padx=20,pady=20 )
+        tk.Button(card, text = "exit", command=lambda: self.displayFrame(self.currentSet), bg = self.mainColor, fg= self.bgSecondary, font=("American Typewriter", 14)).pack(anchor='center', side=tk.BOTTOM,padx=20,pady=5 )
+    
         self.frames["Question " + str(x)] = card
         print(card)
+    def hideCard(self,content_label):
+            content_label.config(fg=self.mainColor)
     def submit_data(self): # Gets the information to make the card
         answer = self.entryanwser.get().strip()
         question = self.entryquestion.get().strip()
@@ -263,6 +281,8 @@ class benkyou:
         frame.pack(fill="both", expand=True)
         
         print(f"Frame: {frameName}")  # For debugging
+    
+    
 file = open("test.json", 'r+')
 app = benkyou(file)
 app.root.mainloop()

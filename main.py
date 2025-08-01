@@ -3,6 +3,7 @@ import json as js
 from tkinter import ttk, messagebox
 import random
 from PIL import Image, ImageTk
+import playsound
 class benkyou:
     def __init__(self, file):
         self.root = tk.Tk()
@@ -42,6 +43,8 @@ class benkyou:
         self.currentCard = tk.Button()
         # Holds if image card or not
         self.image = False
+        # Holds if audio card or not
+        self.audio = False
         # Create all frames
         self.makeFrames()
         
@@ -137,6 +140,8 @@ class benkyou:
                 tk.Button(makeSetButtons, text="Delete set", command= self.del_set, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
                 tk.Button(makeSetButtons, text="Delete Cards", command= self.del_cards, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
                 tk.Button(makeSetButtons, text="add image card", command= self.addImage, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
+                tk.Button(makeSetButtons, text="add audio card", command= self.addAudio, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
+
                 # button to go back
                 makebackButtons = tk.Frame(makeSetFrame, bg=self.bgColor)
                 makebackButtons.pack(side=tk.BOTTOM,fill="x", pady=10)
@@ -251,24 +256,35 @@ class benkyou:
             self.cards = self.set_names[setName]
             self.count = self.cards["count"]
             for x in range(1, self.count):
-                if not self.cards["Question " + str(x)][0].endswith(".jpeg"):
+                if not self.cards["Question " + str(x)][0].endswith(".jpeg") and not self.cards["Question " + str(x)][0].endswith((".mp4",".mp3")):
                     self.makeCard(self.cards["Question " + str(x)][0], self.cards["Question " + str(x)][1],x)
-                else: # Makes sure image can actually be opened before making the card
+                elif self.cards["Question " + str(x)][0].endswith(".jpeg"): # Makes sure image can actually be opened before making the card
                     try:
                         open("images/" + self.cards["Question " + str(x)][0])
                         self.makeCard(self.cards["Question " + str(x)][0], self.cards["Question " + str(x)][1],x,True)
                     except FileNotFoundError:
-                        messagebox.showerror("Error", "Couldn't find jpeg")
+                        messagebox.showerror("Error", "Couldn't find jpeg " + self.cards["Question " + str(x)][0])
+                        return
+                else: # Makes sure audio file can be opened before making the card
+                    try:
+                        open("audio/" + self.cards["Question " + str(x)][0])
+                        self.makeCard(self.cards["Question " + str(x)][0], self.cards["Question " + str(x)][1],x, False, True)
+                    except FileNotFoundError:
+                        messagebox.showerror("Error", "Couldn't find audio " + self.cards["Question " + str(x)][0])
+                        return
         else:
             self.count = 1
             self.cards = {}
         self.displayFrame(setName)
 
-    def makeCard(self, ques, answer, x, image = False): # Makes a new card frame using the question and answer
+    def makeCard(self, ques, answer, x, image = False, audio = False): # Makes a new card frame using the question and answer
         """Creates a card-like frame with a question and answer """
         card = tk.Frame(self.container, bg="#D79ECD", bd=2, relief="groove")
 
-        if not image:
+        if not image and not audio:
+            print("Here")
+            print(image)
+            print(audio)
             title_label = tk.Label(card, text=ques, font=("American Typewriter", 16), bg="#D79ECD")
             title_label.pack(anchor="w", padx=10, pady=5)
             
@@ -279,7 +295,7 @@ class benkyou:
             #tk.Button(card, text="Delete", command= self.deleteCard, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
             tk.Button(card, text = "Show answer", command=lambda:content_label.pack(anchor="w", padx=10, pady=5)).pack(anchor='s',padx=20 )
             tk.Button(card, text = "exit", command=lambda: self.displayFrame(self.currentSet), bg = self.bgColor, font=("American Typewriter", 14)).pack(anchor='s',padx=20)
-        else: # Makes an image if user clicked add an image card
+        elif image: # Makes an image if user clicked add an image card
             actualImage = Image.open("images/" +ques)
             resized_image = actualImage.resize((250, 200))
             actualImage = ImageTk.PhotoImage(resized_image)
@@ -292,12 +308,27 @@ class benkyou:
             tk.Button(card, text="next", command= self.incr_lI, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
             tk.Button(card, text = "Show answer", command=lambda:content_label.pack(anchor="w", padx=10, pady=5)).pack(anchor='s',padx=20 )
             tk.Button(card, text = "exit", command=lambda: self.displayFrame(self.currentSet), bg = self.bgColor, font=("American Typewriter", 14)).pack(anchor='s',padx=20)
+        else: # Makes a button for the audio file
+
+            content_label = tk.Label(card, text=answer, font=("American Typewriter", 12), bg="#D79ECD")
+            content_label.pack_forget()
+            tk.Button(card, text="Play Audio", command= lambda: self.playAudio(ques), bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
+            tk.Button(card, text="back", command= self.de_incr_lI, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
+            tk.Button(card, text="next", command= self.incr_lI, bg= "#FBAAA0", font=("American Typewriter", 14)).pack(anchor='s', padx= 20)
+            tk.Button(card, text = "Show answer", command=lambda:content_label.pack(anchor="w", padx=10, pady=5)).pack(anchor='s',padx=20 )
+            tk.Button(card, text = "exit", command=lambda: self.displayFrame(self.currentSet), bg = self.bgColor, font=("American Typewriter", 14)).pack(anchor='s',padx=20)
+            
 
         self.frames["Question " + str(x)] = card
         print(card)
     
+    def playAudio(self, audioFile): # plays the audio file
+        playsound.playsound("audio/" + audioFile)
     def addImage(self): # Makes self.image true if clicked add image card
         self.image = True
+        self.displayFrame("MakeCardFrame")
+    def addAudio(self): # Makes self.audio true if clicked add audio card
+        self.audio = True
         self.displayFrame("MakeCardFrame")
     #def deleteCard(self):
     #    questionNum = self.randomCard[self.lI]
@@ -332,9 +363,24 @@ class benkyou:
                 self.makeCard(question, answer, self.count, self.image)
                 self.count += 1
                 self.clear_form()
+                self.image = False
                 return answer, question
             except FileNotFoundError:
                 messagebox.showerror("Error", "Please enter a valid jpeg in images folder")
+                self.image = False
+                return
+        if self.audio: # Makes sure audio file can actually be opened before making the card
+            try:
+                open("audio/"+question)
+                self.cards["Question " + str(self.count)] = (question, answer)
+                self.makeCard(question, answer, self.count, False, self.audio)
+                self.count += 1
+                self.clear_form()
+                self.audio = False
+                return answer, question
+            except FileNotFoundError:
+                messagebox.showerror("Error", "Please enter a valid audio file in audio folder")
+                self.audio = False
                 return
 
         self.cards["Question " + str(self.count)] = (question, answer)

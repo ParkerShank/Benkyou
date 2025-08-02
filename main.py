@@ -22,7 +22,7 @@ class benkyou:
         self.buttonColor = self.bgSecondary
         self.file = file # The file we read and write to
         # holds dictionary representation of all the flash card information
-        self.set_names = self.safe_load_json()
+        self.set_names = js.load(self.file)
         # used when making buttons for the set page
         self.listOfSetsPrinted = []
         # holds text information for cards in a single set
@@ -317,6 +317,6 @@ class benkyou:
         # Repack the container to apply changes
         self.container.pack(fill="both", expand=True, padx=10, pady=10)
         print(f"Color mode changed to {self.colorMode}")
-dafile = "data.txt"  # Example filename
-app = benkyou(dafile)
+file = open("test.json", 'r+')
+app = benkyou(file)
 app.root.mainloop()

@@ -275,14 +275,48 @@ class benkyou:
         # Hide all frames
         for frame in self.frames.values():
             frame.pack_forget()
-        
-        # Show the requested frame
-        frame = self.frames[frameName]
-        frame.pack(fill="both", expand=True)
+        for setFrame in self.sets.values():
+            setFrame.pack_forget()
+        self.container.pack_forget()
+        self.menuContainer.pack_forget()
+
+        if frameName == "CreateSetPage" or frameName == "SettingsPage":
+            self.menuContainer.pack(fill="both", expand=True, padx=35, pady=35)
+            frame = self.frames[frameName]
+            frame.pack(fill="both", expand=True)
+        else:
+            self.container.pack(fill="both", expand=True, padx=10, pady=10)
+            # Show the requested frame
+            try:
+                frame = self.frames[frameName]
+                frame.pack(fill="both", expand=True)
+            except:
+                set = self.sets[frameName]
+                set.pack(fill="both", expand=True) if set else None
         
         print(f"Frame: {frameName}")  # For debugging
-    
-    
-file = open("test.json", 'r+')
-app = benkyou(file)
+    def changeColorMode(self):
+        """Change the color mode of the application"""
+        if self.colorMode == "Dark":
+            self.bgColor = "#FFFFFF"
+            self.buttonColor = "#000000"
+            self.bgSecondary = "#F0F0F0"
+            self.colorMode = "Light"
+        else:
+            self.bgColor = "#172E4A"
+            self.buttonColor = "#E74C3C"
+            self.bgSecondary = "#27174A"
+            self.colorMode = "Dark"
+
+        # Update all frames with new colors
+        for frame in self.frames.values():
+            frame.configure(bg=self.bgColor)
+        for setFrame in self.sets.values():
+            setFrame.configure(bg=self.bgColor)
+        
+        # Repack the container to apply changes
+        self.container.pack(fill="both", expand=True, padx=10, pady=10)
+        print(f"Color mode changed to {self.colorMode}")
+dafile = "data.txt"  # Example filename
+app = benkyou(dafile)
 app.root.mainloop()

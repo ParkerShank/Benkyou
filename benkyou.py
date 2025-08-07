@@ -170,6 +170,8 @@ class benkyou:
         tk.Button(makeSetButtons, text="Delete set", command= self.del_set, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
         tk.Button(makeSetButtons, text="Delete Cards", command= self.del_cards, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
         tk.Button(makeSetButtons, text="add image card", command= self.addImage, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
+        tk.Button(makeSetButtons, text="add audio card", command= self.addAudio, bg = self.buttonColor, font=("American Typewriter", 14)).pack(side=tk.LEFT, padx=10)
+
         # button to go back
         makebackButtons = tk.Frame(makeSetFrame, bg=self.bgColor)
         makebackButtons.pack(side=tk.BOTTOM,fill="x", pady=10)
@@ -304,15 +306,15 @@ class benkyou:
             title_label = tk.Label(card, image=actualImage)
             title_label.image = actualImage
             title_label.pack()
-            content_label = tk.Label(card, text=answer, font=("American Typewriter", 12), bg=self.bgSecondary, fg=self.mainColor)
+            content_label = tk.Label(card, text=answer, font=("American Typewriter", 12), fg=self.mainColor, bg=self.mainColor)
             content_label.pack(anchor="w", padx=10, pady=5)
-            tk.Button(card, text="back", command= self.de_incr_lI, bg= self.bgSecondary, font=("American Typewriter", 14)).pack(anchor='center', side=tk.LEFT,padx=20,pady=20)
-            tk.Button(card, text="next", command= self.incr_lI, bg= self.bgSecondary, font=("American Typewriter", 14)).pack(anchor='center', side=tk.RIGHT,padx=20,pady=20)
+            tk.Button(card, text="back", command= lambda: (self.hideCard(content_label),self.de_incr_lI()), bg= self.bgSecondary, font=("American Typewriter", 14)).pack(anchor='center', side=tk.LEFT,padx=20,pady=20 )
+            tk.Button(card, text="next", command= lambda: (self.hideCard(content_label),self.incr_lI()), bg= self.bgSecondary, font=("American Typewriter", 14)).pack(anchor='center', side=tk.RIGHT,padx=20,pady=20 )
             tk.Button(card, text = "Show answer", command=lambda:content_label.config(fg=self.bgSecondary),bg = self.mainColor, fg= self.bgSecondary).pack(anchor='center', side=tk.BOTTOM,padx=20,pady=20)
             tk.Button(card, text = "exit", command=lambda: self.displayFrame(self.currentSet),bg = self.mainColor, fg= self.bgSecondary, font=("American Typewriter", 14)).pack(anchor='center', side=tk.BOTTOM,padx=20,pady=20)
         else: # Makes a button for the audio file
 
-            content_label = tk.Label(card, text=answer, font=("American Typewriter", 12), bg=self.bgSecondary, fg=self.mainColor)
+            content_label = tk.Label(card, text=answer, font=("American Typewriter", 12), fg=self.mainColor, bg=self.mainColor)
             content_label.pack(anchor="w", padx=10, pady=5)
             tk.Button(card, text="Play Audio", command= lambda: self.playAudio(ques), bg= self.bgSecondary, font=("American Typewriter", 14)).pack(anchor='s', side=tk.LEFT, padx= 20, pady=20)
             tk.Button(card, text="back", command= lambda: (self.hideCard(content_label),self.de_incr_lI()), bg= self.bgSecondary, font=("American Typewriter", 14)).pack(anchor='s', side=tk.LEFT, padx= 20, pady=20)

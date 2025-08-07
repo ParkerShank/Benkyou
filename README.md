@@ -20,16 +20,31 @@ Styled with a clean, modern UI using consistent background and accent colors.
 
 Setup & Installation
 Requirements
-Python 3.x
+Python 3.13.5
 
 Dependencies:
 pip install pillow playsound
+
+Troubleshooting on Mac:
+    Will have to set up a virtual enviornment to run
+    python3 -m pip install virtualenv
+    python3 -m virtualenv venv # create a new venv in ./venv
+    source ./venv/bin/activate # activate your new venv
+    deactivate # Will deactivate your virtal enviornment
+    Then install pillow and playsound
+If playsound is giving error:
+    pip install setuptools
+    pip install wheel
+
+
+
 
 Folder Structure
 ├── benkyou.py         # Main app file
 ├── test.json          # JSON file for flashcard sets
 ├── images/            # Folder for image cards (JPEGs)
 ├── audio/             # Folder for audio cards (MP3/MP4)
+
 Run the App
 
 python benkyou.py

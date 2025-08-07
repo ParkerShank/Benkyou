@@ -1,4 +1,5 @@
 {
+    "default": "",
     "new set": {
         "Question 1": [
             "womp",
@@ -6,7 +7,15 @@
         ],
         "count": 2
     },
-    "set 3": "",
-    "Womp Womp": {},
-    "dtyrj": ""
+    "audio/image":{
+        "Question 1":[
+            "first.mp4",
+            "Works?"
+        ],
+        "Question 2":[
+            "test.jpeg",
+            "works?"
+        ],
+        "count": 3
+    }
 }

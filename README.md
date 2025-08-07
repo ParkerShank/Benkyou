@@ -23,33 +23,24 @@ Requirements
 Python 3.x
 
 Dependencies:
-
-bash
-Copy
-Edit
 pip install pillow playsound
+
 Folder Structure
-bash
-Copy
-Edit
-.
 ├── benkyou.py         # Main app file
 ├── test.json          # JSON file for flashcard sets
 ├── images/            # Folder for image cards (JPEGs)
 ├── audio/             # Folder for audio cards (MP3/MP4)
 Run the App
-bash
-Copy
-Edit
+
 python benkyou.py
 Make sure test.json is initialized with:
 
 json
-Copy
-Edit
+
 {
   "default": ""
 }
+
 How It Works
 Set Management
 Create Set: Go to “View Sets” → “Create Set” to add a new set.
@@ -71,15 +62,13 @@ Navigate with Back, Next, Show Answer, or Exit.
 File Structure
 All flashcard data is saved in a JSON file. Here's a basic structure:
 
-json
-Copy
-Edit
 {
   "Biology": {
     "Question 1": ["What is the powerhouse of the cell?", "Mitochondria"],
     "count": 2
   }
 }
+
 Image/audio questions simply use the filename instead of a question string.
 
 Code Structure
@@ -100,12 +89,14 @@ del_set(), del_card(), del_cards(): Deletion utilities.
 To-Do / Ideas
 Support .wav or .ogg files.
 
+switch to a new sound module
+
 Study statistics (accuracy, streaks).
 
 Export/import sets as files.
 
 Preview audio/image before adding.
 
-Author
-Parker Shanklin
+Authors:
+Parker Shanklin, Amaar Sharif
 A creative, hands-on developer passionate about interactive educational tools.

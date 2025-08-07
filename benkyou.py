@@ -101,11 +101,11 @@ class benkyou:
         self.frames["MakeCardFrame"] = makeCardFrame
 
         # makes a new set page for each set
-        createSetPage = tk.Frame(self.container, bg="#BFB1C1", bd =2)
+        createSetPage = tk.Frame(self.container, bg=self.mainColor, bd =2)
         createSetPage.pack(fill="both",padx=10,pady=10, expand=True)
 
-        tk.Label(createSetPage, text="Create a Set", font=("Arial", 20), bg="#BFB1C1", fg=self.bgColor).pack(pady=5, anchor="center")
-        tk.Label(createSetPage, text="Enter the name of the set", font=("Arial", 14), bg="#BFB1C1", fg=self.bgColor).pack(pady=5, anchor="center")
+        tk.Label(createSetPage, text="Create a Set", font=("Arial", 20), bg=self.mainColor, fg=self.bgSecondary).pack(pady=5, anchor="center")
+        tk.Label(createSetPage, text="Enter the name of the set", font=("Arial", 14), bg=self.mainColor, fg=self.bgSecondary).pack(pady=5, anchor="center")
 
         self.entrySetName = tk.Entry(createSetPage, font=("American Typewriter", 14), bg=self.buttonColor)
         self.entrySetName.pack(fill="x", padx=10, pady=5)
@@ -304,7 +304,7 @@ class benkyou:
             title_label = tk.Label(card, image=actualImage)
             title_label.image = actualImage
             title_label.pack()
-            content_label = tk.Label(card, text=answer, font=("American Typewriter", 12), bg="#D79ECD")
+            content_label = tk.Label(card, text=answer, font=("American Typewriter", 12), bg=self.bgSecondary, fg=self.mainColor)
             content_label.pack(anchor="w", padx=10, pady=5)
             tk.Button(card, text="back", command= self.de_incr_lI, bg= self.bgSecondary, font=("American Typewriter", 14)).pack(anchor='center', side=tk.LEFT,padx=20,pady=20)
             tk.Button(card, text="next", command= self.incr_lI, bg= self.bgSecondary, font=("American Typewriter", 14)).pack(anchor='center', side=tk.RIGHT,padx=20,pady=20)
@@ -312,7 +312,7 @@ class benkyou:
             tk.Button(card, text = "exit", command=lambda: self.displayFrame(self.currentSet),bg = self.mainColor, fg= self.bgSecondary, font=("American Typewriter", 14)).pack(anchor='center', side=tk.BOTTOM,padx=20,pady=20)
         else: # Makes a button for the audio file
 
-            content_label = tk.Label(card, text=answer, font=("American Typewriter", 12), bg="#D79ECD")
+            content_label = tk.Label(card, text=answer, font=("American Typewriter", 12), bg=self.bgSecondary, fg=self.mainColor)
             content_label.pack(anchor="w", padx=10, pady=5)
             tk.Button(card, text="Play Audio", command= lambda: self.playAudio(ques), bg= self.bgSecondary, font=("American Typewriter", 14)).pack(anchor='s', side=tk.LEFT, padx= 20, pady=20)
             tk.Button(card, text="back", command= lambda: (self.hideCard(content_label),self.de_incr_lI()), bg= self.bgSecondary, font=("American Typewriter", 14)).pack(anchor='s', side=tk.LEFT, padx= 20, pady=20)
